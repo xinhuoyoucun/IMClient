@@ -1,7 +1,10 @@
 <template>
 	<view class="content">
+		<view class="">
+			<input class="uni-input" v-model="toUserId" focus placeholder="发给谁" />
+		</view>
 		<view class="cu-chat">
-			<block v-for="(item,index) in messageList" :key="index">
+			<block v-for="(item,index) in imData.messageList" :key="index">
 				<block v-if="item.type == 'system'">
 					<view class="cu-info round" v-if="item.msg.type=='text'">{{item.msg.content.text}}</view>
 					<view class="cu-info" v-if="item.msg.type=='noFriendTips'">
@@ -14,7 +17,7 @@
 				</block>
 				<block v-if="item.type == 'user'">
 					<view class="date text-center margin-top-sm text-gray">
-						{{new Date().toLocaleString()}}
+						{{item.msg.time}}
 					</view>
 					<view class="cu-item self" v-if="item.msg.flow=='out'">
 						<view class="main">
@@ -41,7 +44,6 @@
 				</block>
 			</block>
 		</view>
-
 		<view class="padding-lr cu-bar foot input">
 			<textarea auto-height class="solid-bottom" style="width: 80%;" :adjust-position="false" :focus="false" maxlength="100"
 			 cursor-spacing="10" v-model="text" />
@@ -51,139 +53,49 @@
 </template>
 
 <script>
-	import yuanIm from  "../../common/yuanIm.js"
+	import {IM,imData} from  "../../common/yuanIm.js"
+	import {
+		mapGetters,
+		mapActions
+	} from 'vuex'
 	export default {
 		data() {
 			return {
 				text: "",
-				messageList: [{
-						type: "user",
-						msg: {
-							id: 1,
-							type: "text",
-							time: "1594188719",	
-							fromUserId:1,
-							toUserId:10,
-							flow: "out",
-							userinfo: {
-								uid: 0,
-								nickname: "大黑哥",
-								avatar: "/static/img/face.jpg"
-							},
-							content: {
-								text: "为什么温度会相差那么大？"
-							}
-						}
-					},
-					{
-						type: "system",
-						msg: {
-							id: 0,
-							type: "text",
-							content: {
-								text: "对方撤回一条消息!"
-							}
-						}
-					},
-					{
-						type: "user",
-						msg: {
-							id: 1,
-							type: "text",
-							time: "1594188719",
-							fromUserId:1,
-							toUserId:10,
-							flow: "in",
-							userinfo: {
-								uid: 0,
-								nickname: "客服",
-								avatar: "/static/img/face.jpg"
-							},
-							content: {
-								text: "我怎么知道？"
-							}
-						}
-					},
-					{
-						type: "system",
-						msg: {
-							id: 0,
-							type: "iconAndText",
-							content: {
-								icon: "cuIcon-roundclosefill",
-								text: "对方拒绝了你的消息"
-							}
-						}
-					},
-					{
-						type: "system",
-						msg: {
-							id: 0,
-							type: "noFriendTips"
-						}
-					},
-					{
-						type: "user",
-						msg: {
-							id: 5,
-							type: "img",
-							time: "13:05",
-							fromUserId:1,
-							toUserId:10,
-							flow: "in",
-							userinfo: {
-								uid: 0,
-								nickname: "大黑哥",
-								avatar: "/static/img/face.jpg"
-							},
-							content: {
-								url: "/static/img/p10.jpg",
-								w: 200,
-								h: 200
-							}
-						}
-					},
-					{
-						type: "user",
-						msg: {
-							id: 5,
-							type: "img",
-							time: "13:05",
-							fromUserId:1,
-							toUserId:10,
-							flow: "out",
-							userinfo: {
-								uid: 0,
-								nickname: "大黑哥",
-								avatar: "/static/img/face.jpg"
-							},
-							content: {
-								url: "/static/img/p10.jpg",
-								w: 200,
-								h: 200
-							}
-						}
-					}
-				]
+				toUserId:"",
+				fromUserId:"",
+				im:{}
 			}
 		},
 		onLoad(option) {
-			let token=option.token
-			yuanIm.IM.getInstance(token);
+			let token=option.token;
+			this.fromUserId=token;
+			IM.getInstance(token);
 		},
-		// beforeDestroy() {
-		// 	// 页面离开时断开连接,清除定时器
-		// 	console.log("页面离开时断开连接,清除定时器");
-		// 	this.im.close
+		computed: {
+			...mapGetters({
+				imData: 'getImData'
+			})
+		},
+		// watch:{
+			
 		// },
+		beforeDestroy() {
+			// 页面离开时断开连接,清除定时器
+			console.log("页面离开时断开连接,清除定时器");
+			IM.close();
+		},
 		methods: {
 			sendMsg() {
+				let time = new Date().toLocaleString()
 				let message = {
 					type: "user",
 					msg: {
 						id: 1,
 						type: "text",
-						time: new Date().valueOf(),
+						time: time,
+						fromUserId: this.fromUserId,
+						toUserId: this.toUserId,
 						flow: "out",
 						userinfo: {
 							uid: 0,
@@ -195,9 +107,15 @@
 						}
 					}
 				}
-				this.messageList.push(message)
 				
-				yuanIm.IM.sendMsg(message)
+				// let imData = this.$store.state.imData
+				this.imData.messageList.push(message)
+				// this.$store.dispatch('setImData',imData)
+				
+				
+				
+				
+				IM.sendMsg(message)
 				
 				window.scrollTo(0,50000);
 				

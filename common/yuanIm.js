@@ -1,12 +1,17 @@
+import store from '../store' // 获取 Vuex Store 实例，注意是**实例**，而不是 vuex 这个库
+
 let ws = {}
-const webSocketUrl="ws://127.0.0.1:9999/im"
-let userInfo={}
-let timer=""
+let imData = {
+	
+}
+const webSocketUrl = "ws://127.0.0.1:9999/im"
+let userInfo = {}
+let timer = ""
 
 let IM = {
 	getInstance: (token) => {
 		onConnection()
-		userInfo.token=token
+		userInfo.token = token
 	},
 	sendMsg: (msg) => {
 		if (msg.msg.type == "text") {
@@ -17,11 +22,11 @@ let IM = {
 			sendBolb(msg)
 		}
 	},
-	onwillreconnect: ()=>{
+	onwillreconnect: () => {
 		console.log("断线重连中...");
 		onConnection()
 	},
-	close:()=>{
+	close: () => {
 		console.log("断开连接");
 		// 监听socket关闭
 		ws.onclose = onClose(event)
@@ -45,42 +50,45 @@ function onConnection() {
 		onClose()
 		// 监听socket消息
 		onMessage()
-		
+
 	}
 }
 
 function onOpen() {
 	ws.onopen = function(event) {
-	  console.log("WebSocket is open now.");
-	  checkWebSocketState()
-	  // keepAlive();
+		console.log("WebSocket is open now.");
+		checkWebSocketState()
+		// keepAlive();
 	};
 }
 
 function onError() {
 	ws.onerror = function(event) {
-	  console.error("WebSocket error observed:", event);
+		console.error("WebSocket error observed:", event);
 	};
 }
 
 function onClose() {
 	ws.onclose = function(event) {
-	  console.log("WebSocket is closed now.");
-	  window.clearInterval(timer);
+		console.log("WebSocket is closed now.");
+		window.clearInterval(timer);
 	};
 }
 
 function onMessage() {
 	ws.onmessage = function(event) {
-	  console.log("WebSocket message received:", event.data);
+		console.log("WebSocket message received:", event.data);
+		imData=store.state.imData
+		imData.messageList.push(JSON.parse(event.data))
+		store.dispatch('setImData', imData)
 	};
 }
 
-function keepAlive(){
+function keepAlive() {
 	timer = setInterval(() => {
 		try {
-			let keepAlive={
-				type:"keepAlive"
+			let keepAlive = {
+				type: "keepAlive"
 			}
 			sendMsg(keepAlive);
 			console.log("发送心跳包");
@@ -88,10 +96,10 @@ function keepAlive(){
 			console.log("断线了: ", err);
 			onConnection();
 		}
-	}, 1000*60);
+	}, 1000 * 60);
 }
 
-function login(){
+function login() {
 	let loginInfo = {
 		type: "login",
 		msg: {
@@ -102,11 +110,11 @@ function login(){
 	console.log("登录中...");
 }
 
-function sendMsg(msg){
+function sendMsg(msg) {
 	ws.send(JSON.stringify(msg))
 }
 
-function sendBolb(msg){
+function sendBolb(msg) {
 	ws.send(new Bolb(msg))
 }
 
@@ -135,5 +143,6 @@ function checkWebSocketState() {
 
 
 module.exports = {
-	IM: IM
+	IM: IM,
+	imData: imData
 }

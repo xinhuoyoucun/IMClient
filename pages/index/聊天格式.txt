@@ -1,0 +1,73 @@
+//文本消息
+{
+	type: "user",
+	msg: {
+		id: 1,
+		type: "text",
+		time: "1594188719",	
+		fromUserId:1,
+		toUserId:10,
+		flow: "out",
+		userinfo: {
+			uid: 0,
+			nickname: "大黑哥",
+			avatar: "/static/img/face.jpg"
+		},
+		content: {
+			text: "为什么温度会相差那么大？"
+		}
+	}
+}
+//图片消息
+{
+	type: "user",
+	msg: {
+		id: 5,
+		type: "img",
+		time: "13:05",
+		fromUserId:1,
+		toUserId:10,
+		flow: "out",
+		userinfo: {
+			uid: 0,
+			nickname: "大黑哥",
+			avatar: "/static/img/face.jpg"
+		},
+		content: {
+			url: "/static/img/p10.jpg",
+			w: 200,
+			h: 200
+		}
+	}
+}
+//系统消息,撤回消息
+{
+	type: "system",
+	msg: {
+		id: 0,
+		type: "text",
+		content: {
+			text: "对方撤回一条消息!"
+		}
+	}
+}
+//系统消息,黑名单提示
+{
+	type: "system",
+	msg: {
+		id: 0,
+		type: "iconAndText",
+		content: {
+			icon: "cuIcon-roundclosefill",
+			text: "对方拒绝了你的消息"
+		}
+	}
+}
+//系统消息,不是好友提示
+{
+	type: "system",
+	msg: {
+		id: 0,
+		type: "noFriendTips"
+	}
+}
